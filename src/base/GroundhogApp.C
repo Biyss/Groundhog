@@ -4,6 +4,8 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+#include "LaplaceYoung.h"
+
 template<>
 InputParameters validParams<GroundhogApp>()
 {
@@ -45,6 +47,7 @@ extern "C" void GroundhogApp__registerObjects(Factory & factory) { GroundhogApp:
 void
 GroundhogApp::registerObjects(Factory & factory)
 {
+  registerKernel(LaplaceYoung);
 }
 
 // External entry point for dynamic syntax association

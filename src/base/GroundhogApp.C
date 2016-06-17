@@ -4,8 +4,12 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+// kernels
 #include "LaplaceYoung.h"
+
+// Materials
 #include "DislocationGradientEnergy.h"
+#include "TwoPhaseEigenstrain.h"
 
 template<>
 InputParameters validParams<GroundhogApp>()
@@ -49,7 +53,9 @@ void
 GroundhogApp::registerObjects(Factory & factory)
 {
   registerKernel(LaplaceYoung);
+
   registerMaterial(DislocationGradientEnergy);
+  registerMaterial(TwoPhaseEigenstrain);
 }
 
 // External entry point for dynamic syntax association

@@ -9,8 +9,8 @@
 
 // Materials
 #include "DislocationGradientEnergy.h"
-#include "TwoPhaseEigenstrain.h"
-#include "TwoPhaseVariableEigenstrain.h"
+#include "ThreePhaseEigenstrain.h"
+#include "ThreePhaseVariableEigenstrain.h"
 
 template<>
 InputParameters validParams<GroundhogApp>()
@@ -56,8 +56,8 @@ GroundhogApp::registerObjects(Factory & factory)
   registerKernel(LaplaceYoung);
 
   registerMaterial(DislocationGradientEnergy);
-  registerMaterial(TwoPhaseEigenstrain);
-  registerMaterial(TwoPhaseVariableEigenstrain);
+  registerMaterial(ThreePhaseEigenstrain);
+  registerMaterial(ThreePhaseVariableEigenstrain);
 }
 
 // External entry point for dynamic syntax association

@@ -4,25 +4,25 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef TWOPHASEVARIABLEEIGENSTRAIN_H
-#define TWOPHASEVARIABLEEIGENSTRAIN_H
+#ifndef THREEPHASEVARIABLEEIGENSTRAIN_H
+#define THREEPHASEVARIABLEEIGENSTRAIN_H
 
-#include "TwoPhaseEigenstrain.h"
+#include "ThreePhaseEigenstrain.h"
 #include "DerivativeMaterialInterface.h"
 
-class TwoPhaseVariableEigenstrain;
+class ThreePhaseVariableEigenstrain;
 
 template<>
-InputParameters validParams<TwoPhaseVariableEigenstrain>();
+InputParameters validParams<ThreePhaseVariableEigenstrain>();
 
 /**
  * TwoPhaseVariableEigenstrain computes an Eigenstrain based on two parts
  * prefector_1 * eigenstrain_tensor_1 + prefactor_2 * eigenstrain_tensor_2
  */
-class TwoPhaseVariableEigenstrain : public DerivativeMaterialInterface<TwoPhaseEigenstrain>
+class ThreePhaseVariableEigenstrain : public DerivativeMaterialInterface<ThreePhaseEigenstrain>
 {
 public:
-  TwoPhaseVariableEigenstrain(const InputParameters & parameters);
+  ThreePhaseVariableEigenstrain(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStressFreeStrain();
@@ -40,6 +40,11 @@ protected:
   /// second derivatives of the prefactor2 w.r.t. to the args
   std::vector<std::vector<const MaterialProperty<Real> *> > _d2prefactor_2;
 
+  /// first derivatives of the prefactor2 w.r.t. to the args
+  std::vector<const MaterialProperty<Real> *> _dprefactor_3;
+  /// second derivatives of the prefactor2 w.r.t. to the args
+  std::vector<std::vector<const MaterialProperty<Real> *> > _d2prefactor_3;
+
   /// first derivatives of the elastic strain w.r.t. to the args
   std::vector<MaterialProperty<RankTwoTensor> *> _delastic_strain;
   /// second derivatives of the elastic strain w.r.t. to the args
@@ -47,4 +52,4 @@ protected:
 
 };
 
-#endif //TWOPHASEVARIABLEEIGENSTRAIN_H
+#endif //THREEPHASEVARIABLEEIGENSTRAIN_H

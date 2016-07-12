@@ -6,8 +6,6 @@
 
 // kernels
 #include "LaplaceYoung.h"
-#include "VacancyAnnihilationKernel.h"
-#include "ACGradNormal.h"
 #include "SimpleACGradNormal.h"
 
 // Materials
@@ -57,8 +55,6 @@ void
 GroundhogApp::registerObjects(Factory & factory)
 {
   registerKernel(LaplaceYoung);
-  registerKernel(VacancyAnnihilationKernel);
-  registerKernel(ACGradNormal);
   registerKernel(SimpleACGradNormal);
 
   registerMaterial(DislocationGradientEnergy);

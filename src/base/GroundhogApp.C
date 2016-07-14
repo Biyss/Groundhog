@@ -8,6 +8,9 @@
 #include "LaplaceYoung.h"
 #include "SimpleACGradNormal.h"
 
+// AuxKernels
+#include "DislocationTotalFreeEnergy.h"
+
 // Materials
 #include "DislocationGradientEnergy.h"
 #include "ThreePhaseEigenstrain.h"
@@ -56,6 +59,8 @@ GroundhogApp::registerObjects(Factory & factory)
 {
   registerKernel(LaplaceYoung);
   registerKernel(SimpleACGradNormal);
+
+  registerAux(DislocationTotalFreeEnergy);
 
   registerMaterial(DislocationGradientEnergy);
   registerMaterial(ThreePhaseEigenstrain);

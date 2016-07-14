@@ -20,11 +20,8 @@
   [./cv]
   [../]
   [./wv]
+    #scaling = 1e-5
   [../]
-  [./T]
-    initial_condition = 600
-  [../]
-
 []
 
 [Kernels]
@@ -69,10 +66,6 @@
     v = e
     coef = 1
   [../]
-  [./HeatCond]
-    type = HeatConduction
-    variable = T
-  [../]
 []
 
 
@@ -89,7 +82,7 @@
   [../]
   [./cv_ic]
     variable = cv
-    value = 0.021
+    value = 0.21
     type = ConstantIC
   [../]
 []
@@ -124,22 +117,6 @@
       auto_direction = 'x y'
       variable = 'cv wv e'
     [../]
-    [./temp]
-      auto_direction = 'y'
-      variable = 'T'
-    [../]
-  [../]
-  [./left_T]
-    type = PresetBC
-    variable = T
-    boundary = left
-    value = 600
-  [../]
-  [./right_flux]
-    type = NeumannBC
-    variable = T
-    boundary = right
-    value = 5e-10
   [../]
 []
 
@@ -203,6 +180,7 @@
   [./vacancy_energy]
     type = DerivativeParsedMaterial
     block = 0
+    #function = '(3*e^2-2*e^3)*(Ef*cv+kbT*(cv*log(cv)+(1-cv)*log(1-cv)))+(1-3*e^2+2*e^3)*A*(cv-cv0)^2+B*(1-e^2)*e^2'
     function = 'Ef*cv+kbT*(cv*log(cv)+(1-cv)*log(1-cv))'
     constant_names = 'Ef   kbT A cv0 B'
     constant_expressions = '1  0.05  1.0 2.094e-23 1'
@@ -229,65 +207,32 @@
     derivative_order = 2
     outputs = exodus
   [../]
-
-  [./thermal_conductivity]
-    type = ParsedMaterial
-    block = 0
-    f_name = thermal_conductivity
-    constant_names = 'length_scale k_v k_b'
-    constant_expressions = '1e-9 0.42 15.0'
-    function = 'sk_b:= length_scale*k_b;
-    sk_v:= length_scale*k_v;
-    sk_in:= (1-cv^2)*sk_b+cv^2*sk_v;
-    if(cv<0.9,sk_in,sk_v)'
-    outputs = exodus
-    args = 'cv T'
-  [../]
 []
 
-[Postprocessors]
-  #[./E]
-  #  type = ElementIntegralMaterialProperty
-  #  mat_prop = E
-  #  execute_on = 'TIMESTEP_END INITIAL'
-  #[../]
-  #[./C]
-  #  type = ElementIntegralMaterialProperty
-  #  mat_prop = C
-  #  execute_on = 'TIMESTEP_END INITIAL'
-  #[../]
-  [./right_T]
-    type = SideAverageValue
-    variable = T
-    boundary = right
-  [../]
-  [./effect_th_cond]
-    type = ThermalConductivity
-    variable = T
-    flux = 5e-10
-    length_scale = 1e-09
-    T_hot = 600
-    dx = 20
-    k0 = 15
-    boundary = right
-  [../]
-  [./ElementInt_cv]
-    type = ElementIntegralVariablePostprocessor
-    variable = cv
-  [../]
-[]
+#[Postprocessors]
+#  [./E]
+#    type = ElementIntegralMaterialProperty
+#    mat_prop = E
+#    execute_on = 'TIMESTEP_END INITIAL'
+#  [../]
+#  [./C]
+#    type = ElementIntegralMaterialProperty
+#    mat_prop = C
+#    execute_on = 'TIMESTEP_END INITIAL'
+#  [../]
+#[]
 
 [VectorPostprocessors]
-#  [./eta]
-#    type = LineValueSampler
-#    start_point = '-10 0 0'
-#    end_point = '10 0 0'
-#    variable = e
-#    num_points = 40
-#    sort_by = x
-#    execute_on = timestep_end
-#    outputs = csv
-#  [../]
+  [./eta]
+    type = LineValueSampler
+    start_point = '-10 0 0'
+    end_point = '10 0 0'
+    variable = e
+    num_points = 40
+    sort_by = x
+    execute_on = timestep_end
+    outputs = csv
+  [../]
   [./c]
     type = LineValueSampler
     start_point = '-10 0 0'
@@ -318,7 +263,7 @@
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   dt=0.02
-  num_steps = 100
+  num_steps = 500
 
   #[./TimeStepper]
   #  type = IterationAdaptiveDT

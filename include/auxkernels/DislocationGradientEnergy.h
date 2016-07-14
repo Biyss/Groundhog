@@ -7,32 +7,32 @@
 #ifndef DISLOCATIONGRADIENTENERGY_H
 #define DISLOCATIONGRADIENTENERGY_H
 
-#include "FunctionMaterialBase.h"
-#include "MooseEnum.h"
+#include "TotalFreeEnergyBase.h"
 
-// Forward Declaration
+//Forward Declarations
 class DislocationGradientEnergy;
 
 template<>
 InputParameters validParams<DislocationGradientEnergy>();
 
 /**
- * Material class to compute the gradient energy for dislocation model
+ * Total free energy for PFM dislocation model(both the bulk and gradient parts), where the bulk free energy has been defined in a material and called f_name
  */
-class DislocationGradientEnergy : public FunctionMaterialBase
+class DislocationGradientEnergy : public TotalFreeEnergyBase
 {
 public:
   DislocationGradientEnergy(const InputParameters & parameters);
 
 protected:
-  virtual Real computeF();
-  // virtual Real computeDF(unsigned int i_var);
+  virtual Real computeValue();
 
-  // coupled variable gradient
-  const VariableGradient & _grad_args;
+  /// Gradient interface free energy coefficients
+  std::vector<const MaterialProperty<Real> *> _kappas;
 
-  // /// Variables for second order derivatives
-  // const VariableSecond & _second_args;
+  /**
+   * normal direction of the slip plane.
+   */
+  RealGradient _normal;
 };
 
-#endif //ELASTICENERGYMATERIAL_H
+#endif //DISLOCATIONGRADIENTENERGY_H

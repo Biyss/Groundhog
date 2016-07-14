@@ -10,9 +10,10 @@
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"
+#include "DislocationGradientEnergy.h"
+
 
 // Materials
-#include "DislocationGradientEnergy.h"
 #include "ThreePhaseEigenstrain.h"
 #include "ThreePhaseVariableEigenstrain.h"
 
@@ -61,8 +62,8 @@ GroundhogApp::registerObjects(Factory & factory)
   registerKernel(SimpleACGradNormal);
 
   registerAux(DislocationTotalFreeEnergy);
+  registerAux(DislocationGradientEnergy);
 
-  registerMaterial(DislocationGradientEnergy);
   registerMaterial(ThreePhaseEigenstrain);
   registerMaterial(ThreePhaseVariableEigenstrain);
 }

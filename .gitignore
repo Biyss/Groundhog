@@ -66,6 +66,8 @@ traceout*.txt
 *.vtu
 .depend
 .clang_complete
+.jitcache
+.jitdir
 
 # Allow certain files in gold directories
 !**/gold/*.e

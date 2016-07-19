@@ -89,7 +89,7 @@
   [../]
   [./cv_ic]
     variable = cv
-    value = 0.021
+    value = 0.1
     type = ConstantIC
   [../]
 []
@@ -215,7 +215,7 @@
     type = DerivativeSumMaterial
     block = 0
     f_name = F
-    sum_materials = 'C E Fc'
+    sum_materials = 'C E Fc Fn'
     args = 'e cv'
     derivative_order = 2
     outputs = exodus
@@ -243,19 +243,56 @@
     outputs = exodus
     args = 'cv T'
   [../]
+
+  [./probability]
+  # This is a made up toy nucleation rate it should be replaced by
+  # classical nucleation theory in a real simulation.
+    type = ParsedMaterial
+    block = 0
+    f_name = P
+    args = cv
+    function = 0.1
+    outputs = exodus
+  [../]
+  [./nucleation]
+    # The nucleation material is configured to insert nuclei into the free energy
+    # tht force the concentration to go to 0.95, and holds this enforcement for 500
+    # time units.
+  type = DiscreteNucleation
+    block = 0
+    f_name = Fn
+    op_names  = cv
+    op_values = 0.5
+    penalty = 5
+    penalty_mode = MIN
+    map = map
+    outputs = exodus
+  [../]
+[]
+
+
+[UserObjects]
+  [./inserter]
+    # The inserter runs at the end of each time step to add nucleation events
+    # that happend during the timestep (if it converged) to the list of nuclei
+    type = DiscreteNucleationInserter
+    hold_time = 0.02
+    probability = P
+  [../]
+  [./map]
+    # The map UO runs at the beginning of a timestep and generates a per-element/qp
+    # map of nucleus locations. The map is only regenerated if the mesh changed or
+    # the list of nuclei was modified.
+    # The map converts the nucleation points into finite area objects with a given radius.
+    type = DiscreteNucleationMap
+    radius = 0.5
+    int_width = 0.1
+    periodic = cv
+    inserter = inserter
+  [../]
 []
 
 [Postprocessors]
-  #[./E]
-  #  type = ElementIntegralMaterialProperty
-  #  mat_prop = E
-  #  execute_on = 'TIMESTEP_END INITIAL'
-  #[../]
-  #[./C]
-  #  type = ElementIntegralMaterialProperty
-  #  mat_prop = C
-  #  execute_on = 'TIMESTEP_END INITIAL'
-  #[../]
   [./right_T]
     type = SideAverageValue
     variable = T
@@ -277,28 +314,18 @@
   [../]
 []
 
-[VectorPostprocessors]
-#  [./eta]
+#[VectorPostprocessors]
+#  [./c]
 #    type = LineValueSampler
 #    start_point = '-10 0 0'
 #    end_point = '10 0 0'
-#    variable = e
+#    variable = cv
 #    num_points = 40
 #    sort_by = x
 #    execute_on = timestep_end
 #    outputs = csv
 #  [../]
-  [./c]
-    type = LineValueSampler
-    start_point = '-10 0 0'
-    end_point = '10 0 0'
-    variable = cv
-    num_points = 40
-    sort_by = x
-    execute_on = timestep_end
-    outputs = csv
-  [../]
-[]
+#[]
 
 [Preconditioning]
   [./SMP]

@@ -7,6 +7,7 @@
 // kernels
 #include "LaplaceYoung.h"
 #include "SimpleACGradNormal.h"
+#include "UniformVacancySource.h"
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"
@@ -60,6 +61,7 @@ GroundhogApp::registerObjects(Factory & factory)
 {
   registerKernel(LaplaceYoung);
   registerKernel(SimpleACGradNormal);
+  registerKernel(UniformVacancySource);
 
   registerAux(DislocationTotalFreeEnergy);
   registerAux(DislocationGradientEnergy);

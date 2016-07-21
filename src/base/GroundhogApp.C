@@ -4,6 +4,9 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+// IC
+#include "PlateletBaseIC.h"
+
 // kernels
 #include "LaplaceYoung.h"
 #include "SimpleACGradNormal.h"
@@ -59,6 +62,8 @@ extern "C" void GroundhogApp__registerObjects(Factory & factory) { GroundhogApp:
 void
 GroundhogApp::registerObjects(Factory & factory)
 {
+  registerInitialCondition(PlateletBaseIC);
+
   registerKernel(LaplaceYoung);
   registerKernel(SimpleACGradNormal);
   registerKernel(UniformVacancySource);

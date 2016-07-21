@@ -38,6 +38,7 @@ private:
    */
   RealVectorValue _normal;
 
+  Real _coef;
   /**
    * Class variables to hold the components of plane normal coming from the input parameters.
    */

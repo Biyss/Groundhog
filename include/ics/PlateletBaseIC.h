@@ -27,7 +27,7 @@ public:
   virtual void initialSetup();
 
 protected:
-  
+
   MooseMesh & _mesh;
 
   Real _x1;
@@ -35,6 +35,8 @@ protected:
   Real _z1;
   Real _radius;
   Real _thick;
+  Real _int_width_r;
+  Real _int_width_th;
   RealVectorValue _norm;
   Point _center;
 

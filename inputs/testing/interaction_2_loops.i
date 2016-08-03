@@ -3,7 +3,7 @@
   dim = 3
   nx = 80
   ny = 80
-  nz = 16
+  nz = 32
   xmin = -10
   xmax = 10
   ymin = -10
@@ -12,26 +12,10 @@
   zmin = -4
 []
 
-[AuxVariables]
-  [./f_density]   # Local energy density (eV/mol)
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  # Calculates the energy density by combining the local and gradient energies
-  [./f_density]   # (eV/mol/nm^2)
-    type = TotalFreeEnergy
-    variable = f_density
-    f_name = 'F'
-    kappa_names = 'kappa_op'
-    interfacial_vars = e
-  [../]
-[]
-
 [Variables]
   [./e]
+  [../]
+  [./e2]
   [../]
   [./disp_x]
   [../]
@@ -49,6 +33,7 @@
     type = AllenCahn
     variable = e
     f_name = F
+    args = 'e2'
   [../]
   [./AC_int]
     type = SimpleACGradNormal
@@ -59,6 +44,21 @@
     type = TimeDerivative
     variable = e
   [../]
+  [./AC_bulk2]
+    type = AllenCahn
+    variable = e2
+    f_name = F
+    args = 'e'
+  [../]
+  [./AC_int2]
+    type = SimpleACGradNormal
+    variable = e2
+    normal = '0 0 1'
+  [../]
+  [./e_dot2]
+    type = TimeDerivative
+    variable = e2
+  [../]
 []
 
 [ICs]
@@ -67,23 +67,35 @@
     variable = 'e'
     normal = '0 0 1'
     radius = 3
-    x1 = 0
+    x1 = 3.5
     y1 = 0
-    z1 = 0.25
+    z1 = 0
     thickness = 0.5
-    int_width_r = 0.6
-    int_width_th = 0.5
+    int_width_r = 1
+    int_width_th = 0.25
+  [../]
+  [./e2]
+    type = PlateletBaseIC
+    variable = 'e2'
+    normal = '0 0 1'
+    radius = 3
+    x1 = -3.5
+    y1 = 0
+    z1 = 0
+    thickness = 0.5
+    int_width_r = 1
+    int_width_th = 0.25
   [../]
 []
 
 [BCs]
-  [./BC_front_x]
+  [./BC_front_y]
     type = PresetBC
-    variable = 'disp_x'
+    variable = 'disp_y'
     boundary = 'front'
     value = 1.2
   [../]
-  [./BC_front_y]
+  [./BC_front_z]
     type = PresetBC
     variable = 'disp_z'
     boundary = 'front'
@@ -91,31 +103,31 @@
   [../]
   [./BC_back]
     type = PresetBC
-    variable = 'disp_x disp_y disp_z'
+    variable = 'disp_y'
     boundary = 'back'
     value = 0.0
   [../]
   [./BC_left]
     type = PresetBC
-    variable = 'disp_z'
+    variable = 'disp_x'
     boundary = 'left'
     value = 0.0
   [../]
   [./BC_right]
     type = PresetBC
-    variable = 'disp_z'
+    variable = 'disp_x'
     boundary = 'right'
     value = 0.0
   [../]
   [./BC_top_yz]
     type = PresetBC
-    variable = 'disp_y'
+    variable = 'disp_z'
     boundary = 'top'
     value = 0.0
   [../]
   [./BC_bottom]
     type = PresetBC
-    variable = 'disp_y'
+    variable = 'disp_z'
     boundary = 'bottom'
     value = 0.0
   [../]
@@ -141,18 +153,39 @@
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = e
-    args = e
-    f_name = var_dep
+    function = 'e'
+    args = 'e'
+    f_name = var_dep_1
+    enable_jit = true
+    derivative_order = 2
+  [../]
+  [./var_dependence2]
+    type = DerivativeParsedMaterial
+    block = 0
+    function = 'e2'
+    args = 'e2'
+    f_name = var_dep_2
+    enable_jit = true
+    derivative_order = 2
+  [../]
+  [./var_dependence3]
+    type = DerivativeParsedMaterial
+    block = 0
+    function = '0'
+    f_name = var_dep_3
     enable_jit = true
     derivative_order = 2
   [../]
   [./eigenstrain]
-    type = ComputeVariableEigenstrain
+    type = ThreePhaseVariableEigenstrain
     block = 0
-    eigen_base = '0 0 0 0 0.08 0'
-    prefactor = var_dep
-    args = 'e'
+    eigen_base_1 = '0 0 0 0.08 -0.05 0' # burger's vector along X direction
+    eigen_base_2 = '0 0 0 0.08 0.05 0' # burger's vector along Y direction
+    eigen_base_3 = '0 0 0 0.00 0 0'
+    prefactor_1 = var_dep_1
+    prefactor_2 = var_dep_2
+    prefactor_3 = var_dep_3
+    args = 'e e2'
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -163,17 +196,17 @@
     type = ElasticEnergyMaterial
     f_name = E
     block = 0
-    args = 'e'
+    args = 'e e2'
     outputs = exodus
     derivative_order = 2
   [../]
   [./crystalline_energy]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'A*sin(pi*e)*sin(pi*e)'
+    function = 'A*(1-cos(pi*(e-e2))*cos(pi*e2)*cos(pi*e))'
     constant_names = 'A pi'
-    constant_expressions = '0.5 3.14159'
-    args = 'e'
+    constant_expressions = '0.9 3.14159'
+    args = 'e e2'
     f_name = C
     derivative_order = 2
     outputs = exodus
@@ -183,17 +216,22 @@
     block = 0
     f_name = F
     sum_materials = 'C E'
-    args = 'e'
+    args = 'e e2'
     derivative_order = 2
     outputs = exodus
   [../]
 []
 
 [Postprocessors]
-  [./total_energy]          # Total free energy at each timestep
-  type = ElementIntegralVariablePostprocessor
-  variable = f_density
-  execute_on = 'TIMESTEP_END INITIAL'
+  [./E]
+    type = ElementIntegralMaterialProperty
+    mat_prop = E
+    execute_on = 'TIMESTEP_END INITIAL'
+  [../]
+  [./C]
+    type = ElementIntegralMaterialProperty
+    mat_prop = C
+    execute_on = 'TIMESTEP_END INITIAL'
   [../]
 []
 
@@ -214,7 +252,7 @@
   nl_max_its = 10
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
-  num_steps = 20
+  num_steps = 25
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.01

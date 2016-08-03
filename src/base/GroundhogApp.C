@@ -11,6 +11,11 @@
 #include "LaplaceYoung.h"
 #include "SimpleACGradNormal.h"
 #include "UniformVacancySource.h"
+#include "CoefAllenCahn.h"
+#include "CoefSimpleACInterface.h"
+#include "PrefACBulk.h"
+#include "PrefAllenCahn.h"
+#include "PrefAllenCahnBase.h"
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"
@@ -67,6 +72,10 @@ GroundhogApp::registerObjects(Factory & factory)
   registerKernel(LaplaceYoung);
   registerKernel(SimpleACGradNormal);
   registerKernel(UniformVacancySource);
+  registerKernel(CoefAllenCahn);
+  registerKernel(CoefSimpleACInterface);
+  registerKernel(PrefACBulk);
+  registerKernel(PrefAllenCahn);
 
   registerAux(DislocationTotalFreeEnergy);
   registerAux(DislocationGradientEnergy);

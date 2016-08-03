@@ -1,0 +1,13 @@
+[Tests]
+  [./CoefAllenCahn]
+    type = 'Exodiff'
+    input = 'CoefAllenCahn.i'
+    exodiff = 'CoefAllenCahn_out.e'
+  [../]
+
+  [./CoefSimpleACInterface]
+    type = 'Exodiff'
+    input = 'CoefSimpleACInterface.i'
+    exodiff = 'CoefSimpleACInterface_out.e'
+  [../]
+[]

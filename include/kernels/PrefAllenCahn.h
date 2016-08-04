@@ -7,8 +7,9 @@
 #ifndef PREFALLENCAHN_H
 #define PREFALLENCAHN_H
 
-#include "PrefAllenCahnBase.h"
+#include "Kernel.h"
 #include "RankTwoTensor.h"
+#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class PrefAllenCahn;
@@ -21,22 +22,20 @@ InputParameters validParams<PrefAllenCahn>();
  * provided by a DerivativeParsedMaterial to computer the
  * residual for the bulk part of the Allen-Cahn equation.
  */
-class PrefAllenCahn : public PrefAllenCahnBase<Real>
+class PrefAllenCahn : public DerivativeMaterialInterface<Kernel>
 {
 public:
   PrefAllenCahn(const InputParameters & parameters);
 
-  virtual void initialSetup();
-
 protected:
-  virtual Real computeDFDOP(PFFunctionType type);
-  // virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 
-  const unsigned int _nvar;
+  /// Mobility
+  const MaterialProperty<Real> & _L;
+
   const MaterialProperty<Real> & _dFdEta;
   const MaterialProperty<Real> & _d2FdEta2;
-
-  std::vector<const MaterialProperty<Real> *> _d2FdEtadarg;
 
   RealGradient _normal;
 

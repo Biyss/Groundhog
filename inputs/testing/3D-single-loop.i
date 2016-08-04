@@ -69,8 +69,8 @@
     radius = 3
     x1 = 0
     y1 = 0
-    z1 = 0.25
-    thickness = 0.5
+    z1 = 0
+    thickness = 1.0
     int_width_r = 0.6
     int_width_th = 0.5
   [../]

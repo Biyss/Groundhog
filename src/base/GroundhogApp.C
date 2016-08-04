@@ -15,7 +15,6 @@
 #include "CoefSimpleACInterface.h"
 #include "PrefACBulk.h"
 #include "PrefAllenCahn.h"
-#include "PrefAllenCahnBase.h"
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"

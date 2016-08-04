@@ -26,6 +26,8 @@ public:
   PrefACBulk(const InputParameters & parameters);
 
 protected:
+  virtual RealGradient computeCapPsi();
+  virtual RealGradient computeCapPhi();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
@@ -43,16 +45,6 @@ protected:
   Real _n1;
   Real _n2;
   Real _n3;
-
-  // Gamma is the prefector we introduced: |n x _grad_u|^2/|_grad_u|^2
-  Real Gamma;
-  // CapPsi is a vector, which equals to d(|n x _grad_u|^2)/d(_grad_u).
-  // and it can be written in the form: matrix times vector (_prePsi * _grad_u)
-  RealGradient CapPsi;
-  // CapPhi is a vector: CapPsi/|_grad_u|^2 - 2 *|n x (_grad_u|^2/|_grad_u|^4) * _grad_u
-  RealGradient CapPhi;
-  // Calculate cross product: (n x _grad_u)
-  RealGradient normalcross;
 };
 
 #endif //PREFACBULK_H

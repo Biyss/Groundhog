@@ -27,44 +27,47 @@ PrefACBulk::PrefACBulk(const InputParameters & parameters) :
   _n1=_normal(0);
   _n2=_normal(1);
   _n3=_normal(2);
+}
 
-  // Gamma is the prefector we introduced: |n x _grad_u|^2/|_grad_u|^2
-  Gamma = (_normal.cross(_grad_u[_qp])).norm_sq()/_grad_u[_qp].norm_sq();
+RealGradient
+PrefACBulk::computeCapPsi()
+{
   // CapPsi is a vector, which equals to d(|n x _grad_u|^2)/d(_grad_u).
   // and it can be written in the form: matrix times vector (_prePsi * _grad_u)
   RankTwoTensor _prePsi (_n2*_n2 + _n3*_n3, _n1*_n1 + _n3*_n3, _n1*_n1 + _n2*_n2, -1 * _n2 * _n3, -1 * _n1 * _n3, -1 * _n1 * _n2);
-  CapPsi = _prePsi * _grad_u[_qp];
+  RealGradient CapPsi = _prePsi * _grad_u[_qp];
+
+  return CapPsi;
+}
+
+RealGradient
+PrefACBulk::computeCapPhi()
+{
+  RealGradient normalcross = _normal.cross(_grad_u[_qp]);
   // CapPhi is a vector: CapPsi/|_grad_u|^2 - 2 *|n x (_grad_u|^2/|_grad_u|^4) * _grad_u
-  CapPhi = CapPsi/(_grad_u[_qp]*_grad_u[_qp]) - 2 * ((_normal.cross(_grad_u[_qp])).norm_sq()) / ((_grad_u[_qp].norm_sq())*(_grad_u[_qp].norm_sq())) * _grad_u[_qp];
-  // Calculate cross product: (n x _grad_u)
-  normalcross = _normal.cross(_grad_u[_qp]);
+  RealGradient CapPhi = PrefACBulk::computeCapPsi()/(_grad_u[_qp]*_grad_u[_qp]) - 2 * (normalcross.norm_sq()) * _grad_u[_qp] / ((_grad_u[_qp].norm_sq())*(_grad_u[_qp].norm_sq()));
+
+  return CapPhi;
 }
 
 Real
 PrefACBulk::computeQpResidual()
 {
-  // // Gamma is the prefector we introduced: |n x _grad_u|^2/|_grad_u|^2
-  // Real Gamma = (_normal.cross(_grad_u[_qp])).norm_sq()/_grad_u[_qp].norm_sq();
-  // // CapPsi is a vector, which equals to d(|n x _grad_u|^2)/d(_grad_u).
-  // // and it can be written in the form: matrix times vector (_prePsi * _grad_u)
-  // RankTwoTensor _prePsi (_n2*_n2 + _n3*_n3, _n1*_n1 + _n3*_n3, _n1*_n1 + _n2*_n2, -1 * _n2 * _n3, -1 * _n1 * _n3, -1 * _n1 * _n2);
-  // RealGradient CapPsi = _prePsi * _grad_u[_qp];
-  // // CapPhi is a vector: CapPsi/|_grad_u|^2 - 2 *|n x (_grad_u|^2/|_grad_u|^4) * _grad_u
-  // RealGradient CapPhi = CapPsi/(_grad_u[_qp]*_grad_u[_qp]) - 2 * ((_normal.cross(_grad_u[_qp])).norm_sq()) / ((_grad_u[_qp].norm_sq())*(_grad_u[_qp].norm_sq())) * _grad_u[_qp];
-
-  return _L[_qp] * CapPhi * _F[_qp] * _grad_test[_i][_qp];
+  return _L[_qp] * PrefACBulk::computeCapPhi() * _F[_qp] * _grad_test[_i][_qp];
 }
 
 Real
 PrefACBulk::computeQpJacobian()
 {
+  RealGradient normalcross = _normal.cross(_grad_u[_qp]);
+  RankTwoTensor _prePsi (_n2*_n2 + _n3*_n3, _n1*_n1 + _n3*_n3, _n1*_n1 + _n2*_n2, -1 * _n2 * _n3, -1 * _n1 * _n3, -1 * _n1 * _n2);
   // part_1 is the derivative of free energy equation F respect to u[_qp]
-  Real part_1 = _L[_qp] * CapPhi * _dFdEta[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
+  Real part_1 = _L[_qp] * PrefACBulk::computeCapPhi() * _dFdEta[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
   // part_2 is the derivative of CapPhi respect to u[_qp], use the chain rule:
   // d(CapPhi)/d(u[_qp]) = d(CapPhi)/d(_grad_u[_qp]) * _grad_phi[_qp]
   // d(CapPhi)/d(_grad_u[_qp]) = (CapPsi * _grad_u[_qp] - 3 * |n x _grad_u|^2)/|_grad_u[_qp]|^4
-  Real part_2 = _L[_qp] * _grad_test[_i][_qp] * _F[_qp] * _grad_phi[_j][_qp]
-                * ((CapPsi*_grad_u[_qp]-3*normalcross.norm_sq())/(_grad_u[_qp].norm_sq()*_grad_u[_qp].norm_sq()));
+  Real part_2_1 = _L[_qp] * _F[_qp] * (-1 * _prePsi / _grad_u[_qp].norm_sq()) * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  Real part_2_2 = _L[_qp] * _F[_qp] *  (-2 * (PrefACBulk::computeCapPsi()*_grad_u[_qp]-3*normalcross.norm_sq())/(_grad_u[_qp].norm_sq()*_grad_u[_qp].norm_sq())) * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 
-  return part_1 + part_2;
+  return part_1 + part_2_1 + part_2_2;
 }

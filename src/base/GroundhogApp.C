@@ -15,6 +15,7 @@
 #include "CoefSimpleACInterface.h"
 #include "PrefACBulk.h"
 #include "PrefAllenCahn.h"
+#include "ACNormalInterface.h"
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"
@@ -75,6 +76,7 @@ GroundhogApp::registerObjects(Factory & factory)
   registerKernel(CoefSimpleACInterface);
   registerKernel(PrefACBulk);
   registerKernel(PrefAllenCahn);
+  registerKernel(ACNormalInterface);
 
   registerAux(DislocationTotalFreeEnergy);
   registerAux(DislocationGradientEnergy);

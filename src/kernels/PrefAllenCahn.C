@@ -32,9 +32,9 @@ PrefAllenCahn::PrefAllenCahn(const InputParameters & parameters) :
 Real
 PrefAllenCahn::computeQpResidual()
 {
-  if(_grad_u[_qp].norm() <= 1e-2)
+  if(_grad_u[_qp].norm() <= 1e-6)
     Real Gamma = 1;
-  else if(_grad_u[_qp].norm() > 1e-2)
+  else if(_grad_u[_qp].norm() > 1e-6)
     // Gamma is the prefector we introduced: |n x _grad_u|^2/|_grad_u|^2
     Real Gamma = (_normal.cross(_grad_u[_qp])).norm_sq()/_grad_u[_qp].norm_sq();
 
@@ -45,10 +45,10 @@ Real
 PrefAllenCahn::computeQpJacobian()
 {
   Real value = 0.0;
-  
-  if(_grad_u[_qp].norm() <= 1e-2)
+
+  if(_grad_u[_qp].norm() <= 1e-6)
     value = _L[_qp] * _d2FdEta2[_qp] * _phi[_j][_qp] * _test[_i][_qp];
-  else if(_grad_u[_qp].norm() > 1e-2)
+  else if(_grad_u[_qp].norm() > 1e-6)
   {
     // Gamma is the prefector we introduced: |n x _grad_u|^2/|_grad_u|^2
     Real Gamma = (_normal.cross(_grad_u[_qp])).norm_sq()/_grad_u[_qp].norm_sq();
@@ -57,7 +57,7 @@ PrefAllenCahn::computeQpJacobian()
     RankTwoTensor _prePsi (_n2*_n2 + _n3*_n3, _n1*_n1 + _n3*_n3, _n1*_n1 + _n2*_n2, -1 * _n2 * _n3, -1 * _n1 * _n3, -1 * _n1 * _n2);
     RealGradient CapPsi = _prePsi * _grad_u[_qp];
     // CapPhi is a vector: CapPsi/|_grad_u|^2 - 2 *|n x (_grad_u|^2/|_grad_u|^4) * _grad_u
-    RealGradient CapPhi = CapPsi/(_grad_u[_qp]*_grad_u[_qp]) - 2 * ((_normal.cross(_grad_u[_qp])).norm_sq()) / ((_grad_u[_qp].norm_sq())*(_grad_u[_qp].norm_sq())) * _grad_u[_qp];
+    RealGradient CapPhi = CapPsi/(_grad_u[_qp]*_grad_u[_qp]) - 2 * (_normal.cross(_grad_u[_qp])).norm_sq() / (_grad_u[_qp].norm_sq()*_grad_u[_qp].norm_sq()) * _grad_u[_qp];
     value = _L[_qp] * (Gamma * _d2FdEta2[_qp] * _phi[_j][_qp] + CapPhi * _dFdEta[_qp] * _grad_phi[_j][_qp]) * _test[_i][_qp];
   }
 

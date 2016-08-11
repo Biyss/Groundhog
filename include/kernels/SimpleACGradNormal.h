@@ -8,6 +8,7 @@
 #define SIMPLEACGRADNORMAL_H
 
 #include "Kernel.h"
+#include "RankTwoTensor.h"
 
 class SimpleACGradNormal;
 

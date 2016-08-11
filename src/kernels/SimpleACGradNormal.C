@@ -33,21 +33,15 @@ SimpleACGradNormal::SimpleACGradNormal(const InputParameters & parameters) :
 Real
 SimpleACGradNormal::computeQpResidual()
 {
-  Real Sum = 0.0;
-  Sum = (_n3*(_n3*_grad_u[_qp](0)-_n1*_grad_u[_qp](2)) - _n2*(_n1*_grad_u[_qp](1)-_n2*_grad_u[_qp](0))) * _grad_test[_i][_qp](0)
-      + (_n1*(_n1*_grad_u[_qp](1)-_n2*_grad_u[_qp](0)) - _n3*(_n2*_grad_u[_qp](2)-_n3*_grad_u[_qp](1))) * _grad_test[_i][_qp](1)
-      + (_n2*(_n2*_grad_u[_qp](2)-_n3*_grad_u[_qp](1)) - _n1*(_n3*_grad_u[_qp](0)-_n1*_grad_u[_qp](2))) * _grad_test[_i][_qp](2);
+  RankTwoTensor _prePsi (_n2*_n2 + _n3*_n3, _n1*_n1 + _n3*_n3, _n1*_n1 + _n2*_n2, -1 * _n2 * _n3, -1 * _n1 * _n3, -1 * _n1 * _n2);
 
-  return _coef * _kappa_op[_qp] * _L[_qp] * Sum;
+  return _coef * _kappa_op[_qp] * _L[_qp] * _prePsi * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
 Real
 SimpleACGradNormal::computeQpJacobian()
 {
-  Real Sum = 0.0;
-  Sum = (_n3*(_n3*_grad_phi[_j][_qp](0)-_n1*_grad_phi[_j][_qp](2)) - _n2*(_n1*_grad_phi[_j][_qp](1)-_n2*_grad_phi[_j][_qp](0))) * _grad_test[_i][_qp](0)
-      + (_n1*(_n1*_grad_phi[_j][_qp](1)-_n2*_grad_phi[_j][_qp](0)) - _n3*(_n2*_grad_phi[_j][_qp](2)-_n3*_grad_phi[_j][_qp](1))) * _grad_test[_i][_qp](1)
-      + (_n2*(_n2*_grad_phi[_j][_qp](2)-_n3*_grad_phi[_j][_qp](1)) - _n1*(_n3*_grad_phi[_j][_qp](0)-_n1*_grad_phi[_j][_qp](2))) * _grad_test[_i][_qp](2);
+  RankTwoTensor _prePsi (_n2*_n2 + _n3*_n3, _n1*_n1 + _n3*_n3, _n1*_n1 + _n2*_n2, -1 * _n2 * _n3, -1 * _n1 * _n3, -1 * _n1 * _n2);
 
-  return _coef * _kappa_op[_qp] * _L[_qp] * Sum;
+  return _coef * _kappa_op[_qp] * _L[_qp] * _prePsi * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

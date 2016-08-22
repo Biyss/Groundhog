@@ -31,6 +31,7 @@ PlateletBaseIC::PlateletBaseIC(const InputParameters & parameters) :
     _center(_x1, _y1, _z1)
 {
   _random.seed(_tid, getParam<unsigned int>("rand_seed"));
+  _norm /= _norm.norm();
 }
 
 void
@@ -49,17 +50,30 @@ PlateletBaseIC::value(const Point & p)
   //Return value
   Real value = 0;//Outside circle
 
-    if ((std::abs(dist.contract(_norm)) <= _thick/2) && (dist - dist.contract(_norm) * _norm).norm() <= _radius - _int_width_r/2.0) //Inside platelet
-      value = 1;
-    else if ((std::abs(dist.contract(_norm)) <= _thick/2) && (dist - dist.contract(_norm) * _norm).norm() >= _radius - _int_width_r/2.0 && (dist - dist.contract(_norm) * _norm).norm() <= _radius + _int_width_r/2.0) //Smooth interface along radius
+  if (_thick > 0.1) //  Platelet with a finite thickness
     {
-      Real int_pos = ((dist - dist.contract(_norm) * _norm).norm() - _radius + _int_width_r * 0.5)/_int_width_r;
-      value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      if ((std::abs(dist.contract(_norm)) <= _thick/2) && (dist - dist.contract(_norm) * _norm).norm() <= _radius - _int_width_r/2.0) //Inside platelet
+        value = 1;
+      else if ((std::abs(dist.contract(_norm)) <= _thick/2) && (dist - dist.contract(_norm) * _norm).norm() >= _radius - _int_width_r/2.0 && (dist - dist.contract(_norm) * _norm).norm() <= _radius + _int_width_r/2.0) //Smooth interface along radius
+      {
+        Real int_pos = ((dist - dist.contract(_norm) * _norm).norm() - _radius + _int_width_r * 0.5)/_int_width_r;
+        value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      }
+      else if ((dist - dist.contract(_norm) * _norm).norm() <= _radius - _int_width_r/2.0 && (std::abs(dist.contract(_norm)) >= _thick/2) && (std::abs(dist.contract(_norm)) <= _thick/2 + _int_width_th)) //Smooth interface along thickness
+      {
+        Real int_pos = (std::abs(dist.contract(_norm)) - _thick/2)/_int_width_th;
+        value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      }
     }
-    else if ((dist - dist.contract(_norm) * _norm).norm() <= _radius - _int_width_r/2.0 && (std::abs(dist.contract(_norm)) >= _thick/2) && (std::abs(dist.contract(_norm)) <= _thick/2 + _int_width_th)) //Smooth interface along thickness
+  else //  Platelet with zero thickness, reduces to a single layer
     {
-      Real int_pos = (std::abs(dist.contract(_norm)) - _thick/2)/_int_width_th;
-      value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      if (dist.contract(_norm) == 0 && dist.norm() <= _radius - _int_width_r/2.0) //Inside platelet
+        value = 1;
+      else if (dist.contract(_norm) == 0 && dist.norm() >= _radius - _int_width_r/2.0 && dist.norm() <= _radius + _int_width_r/2.0) //Smooth interface along radius
+      {
+        Real int_pos = (dist.norm() - _radius + _int_width_r * 0.5)/_int_width_r;
+        value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      }
     }
 
   return value;

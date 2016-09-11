@@ -4,7 +4,28 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+// IC
+#include "PlateletBaseIC.h"
+
+// kernels
 #include "LaplaceYoung.h"
+#include "SimpleACGradNormal.h"
+#include "UniformVacancySource.h"
+#include "CoefAllenCahn.h"
+#include "CoefSimpleACInterface.h"
+#include "PrefACBulk.h"
+#include "PrefAllenCahn.h"
+#include "ACNormalInterface.h"
+#include "InteractionACGradNormal.h"
+
+// AuxKernels
+#include "DislocationTotalFreeEnergy.h"
+#include "DislocationGradientEnergy.h"
+
+
+// Materials
+#include "ThreePhaseEigenstrain.h"
+#include "ThreePhaseVariableEigenstrain.h"
 
 template<>
 InputParameters validParams<GroundhogApp>()
@@ -47,7 +68,23 @@ extern "C" void GroundhogApp__registerObjects(Factory & factory) { GroundhogApp:
 void
 GroundhogApp::registerObjects(Factory & factory)
 {
+  registerInitialCondition(PlateletBaseIC);
+
   registerKernel(LaplaceYoung);
+  registerKernel(SimpleACGradNormal);
+  registerKernel(UniformVacancySource);
+  registerKernel(CoefAllenCahn);
+  registerKernel(CoefSimpleACInterface);
+  registerKernel(PrefACBulk);
+  registerKernel(PrefAllenCahn);
+  registerKernel(ACNormalInterface);
+  registerKernel(InteractionACGradNormal);
+
+  registerAux(DislocationTotalFreeEnergy);
+  registerAux(DislocationGradientEnergy);
+
+  registerMaterial(ThreePhaseEigenstrain);
+  registerMaterial(ThreePhaseVariableEigenstrain);
 }
 
 // External entry point for dynamic syntax association

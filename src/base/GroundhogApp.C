@@ -17,6 +17,7 @@
 #include "PrefAllenCahn.h"
 #include "ACNormalInterface.h"
 #include "InteractionACGradNormal.h"
+#include "VacancyAnnihilationKernel.h"
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"
@@ -79,6 +80,7 @@ GroundhogApp::registerObjects(Factory & factory)
   registerKernel(PrefAllenCahn);
   registerKernel(ACNormalInterface);
   registerKernel(InteractionACGradNormal);
+  registerKernel(VacancyAnnihilationKernel);
 
   registerAux(DislocationTotalFreeEnergy);
   registerAux(DislocationGradientEnergy);

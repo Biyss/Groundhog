@@ -1,5 +1,6 @@
 #include "PlateletBaseIC.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 template<>
 InputParameters validParams<PlateletBaseIC>()

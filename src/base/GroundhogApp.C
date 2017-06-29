@@ -18,6 +18,7 @@
 #include "ACNormalInterface.h"
 #include "InteractionACGradNormal.h"
 #include "VacancyAnnihilationKernel.h"
+#include "RadiationDefectSource.h"
 
 // AuxKernels
 #include "DislocationTotalFreeEnergy.h"
@@ -27,6 +28,12 @@
 // Materials
 #include "ThreePhaseEigenstrain.h"
 #include "ThreePhaseVariableEigenstrain.h"
+#include "PolyRadiationDefectCreation.h"
+#include "RadiationDefectCreation.h"
+
+// Postprocessors
+#include "Porosity.h"
+#include "InterfaceAreaPostprocessor.h"
 
 template<>
 InputParameters validParams<GroundhogApp>()
@@ -81,12 +88,18 @@ GroundhogApp::registerObjects(Factory & factory)
   registerKernel(ACNormalInterface);
   registerKernel(InteractionACGradNormal);
   registerKernel(VacancyAnnihilationKernel);
+  registerKernel(RadiationDefectSource);
 
   registerAux(DislocationTotalFreeEnergy);
   registerAux(DislocationGradientEnergy);
 
   registerMaterial(ThreePhaseEigenstrain);
   registerMaterial(ThreePhaseVariableEigenstrain);
+  registerMaterial(RadiationDefectCreation);
+  registerMaterial(PolyRadiationDefectCreation);
+
+  registerPostprocessor(InterfaceAreaPostprocessor);
+  registerPostprocessor(Porosity);
 }
 
 // External entry point for dynamic syntax association
